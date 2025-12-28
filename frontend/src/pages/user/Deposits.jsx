@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import api from "../../lib/axios.js";
 import { Copy, CheckCircle } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 
 const CRYPTO_ADDRESS = "0x9Bf3A2D9E5C7B1F2A4E8D6C0A9B7F1D3E5C7B9A2";
 
@@ -41,6 +42,20 @@ export default function Deposits() {
     return n / btcPrice; // BTC = USD / (USD per BTC)
   }, [usdAmount, btcPrice]);
 
+  /* ---------------- QR value (bitcoin URI) ---------------- */
+  const qrValue = useMemo(() => {
+    const n = Number(usdAmount);
+    if (!btcPrice || !n || n <= 0) {
+      // No valid amount → just encode address
+      return CRYPTO_ADDRESS;
+      // or `bitcoin:${CRYPTO_ADDRESS}` if you prefer the URI scheme
+    }
+
+    const btc = (n / btcPrice).toFixed(8);
+    // Many wallets understand this format:
+    return `bitcoin:${CRYPTO_ADDRESS}?amount=${btc}`;
+  }, [usdAmount, btcPrice]);
+
   /* ---------------- Copy address ---------------- */
   const copyAddress = async () => {
     try {
@@ -68,10 +83,9 @@ export default function Deposits() {
     try {
       setLoading(true);
 
-      // Adjust payload to whatever your backend expects:
-      await api.post("/transactions/crypto-deposit", {
-        amountUsd: n,
-        amountBtc: btcAmount, // optional: send BTC equivalent too
+      await api.post("/user/transactions/crypto-deposit", {
+        amount: n, // adjust to what your backend expects
+        // or: amountUsd: n, amountBtc: btcAmount
       });
 
       toast.success("Deposit request submitted");
@@ -87,35 +101,55 @@ export default function Deposits() {
     <div className="space-y-6">
       <h1 className="text-xl md:text-2xl font-bold">Crypto Deposit</h1>
 
-      {/* Wallet Address */}
-      <div className="bg-white rounded-xl shadow p-4">
-        <label className="text-sm text-gray-600 block mb-2">
-          Deposit to this address
-        </label>
+      {/* Wallet Address + QR */}
+      <div className="bg-white rounded-xl shadow p-4 flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <label className="text-sm text-gray-600 block mb-2">
+            Deposit to this address
+          </label>
 
-        <div className="flex items-center gap-2">
-          <input
-            value={CRYPTO_ADDRESS}
-            readOnly
-            className="flex-1 border border-blue-400 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-950"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              value={CRYPTO_ADDRESS}
+              readOnly
+              className="flex-1 border border-blue-400 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-950"
+            />
 
-          <button
-            onClick={copyAddress}
-            className="bg-gray-900 text-white p-2 rounded-lg"
-          >
-            {copied ? (
-              <CheckCircle size={18} className="text-green-400" />
-            ) : (
-              <Copy size={18} />
-            )}
-          </button>
+            <button
+              onClick={copyAddress}
+              className="bg-gray-900 text-white p-2 rounded-lg"
+            >
+              {copied ? (
+                <CheckCircle size={18} className="text-green-400" />
+              ) : (
+                <Copy size={18} />
+              )}
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-2">
+            Send only supported crypto (BTC) to this address. Deposits require
+            admin approval.
+          </p>
         </div>
 
-        <p className="text-xs text-gray-500 mt-2">
-          Send only supported crypto (BTC) to this address. Deposits require
-          admin approval.
-        </p>
+        {/* QR Code */}
+        <div className="flex flex-col items-center justify-center">
+          <p className="text-sm text-gray-600 mb-2">Or scan QR code</p>
+          <div className="bg-white p-2 rounded-lg border border-gray-200">
+            <QRCodeCanvas
+              value={qrValue}
+              size={140}
+              includeMargin={true}
+              bgColor="#ffffff"
+              fgColor="#000000"
+            />
+          </div>
+          <p className="text-[11px] text-gray-500 mt-1 text-center">
+            Scan with your wallet app. If you entered an amount, it may be
+            pre‑filled.
+          </p>
+        </div>
       </div>
 
       {/* Deposit Amount */}
