@@ -19,7 +19,7 @@ const PlanCard = ({ plan, index, onInvest }) => {
       viewport={{ once: true }}
       transition={{ delay: index * 0.15, duration: 0.6 }}
       whileHover={{ y: -8, scale: featured ? 1.02 : 1 }}
-      className={`relative rounded-2xl border p-6 bg-gradient-to-b from-slate-900/60 to-slate-950
+      className={`relative rounded-2xl border p-6 bg-linear-to-b from-slate-900/60 to-slate-950
         ${
           featured
             ? "border-yellow-500 shadow-[0_0_40px_rgba(234,179,8,0.15)]"
