@@ -11,7 +11,7 @@ export const useUserStore = create((set, get) => ({
   // Initialize: call on app mount to hydrate user from cookie
   getCurrentUser: async () => {
     try {
-      const res = await api.get("/auth/me");
+      const res = await axios.get("/auth/me");
       // Backend: { success: true, user: { ... } }
       set({ user: res.data.user, checkingAuth: false });
     } catch (err) {
