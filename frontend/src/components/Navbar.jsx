@@ -28,10 +28,14 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="w-7 h-7 sm:w-8 sm:h-8" />
+            <img
+              src="/assets/logo.png"
+              alt="Logo"
+              className="w-13 h-20 sm:w-8 sm:h-8"
+            />
             <span className="text-lg sm:text-xl font-medium">
-              <span className="text-white">EBU</span>
-              <span className="text-blue-400">KA</span>
+              <span className="text-white text-xl">Fex</span>
+              <span className="text-blue-400 text-xl">invest</span>
             </span>
           </Link>
 
